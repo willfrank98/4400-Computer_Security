@@ -13,8 +13,70 @@ int flags(char* flag)
   }
 }
 
-char* typeA(char* input) {
+void printInvalid(int conv) {
+  if (conv == 0) {
+    printf("no\n");
+  }
+  return;
+}
 
+void typeA(char* input, int convert) {
+    int i = 0;
+  //count number of h's
+  while (input[i] == 'h') {
+    i++;
+  }
+
+  if (i%2 != 0) {
+    printInvalid(convert);
+    return;
+  }
+
+  i++;
+  //check for =
+  if (input[i] != '=') {
+    printInvalid(convert);
+    return;
+  }
+
+  i++;
+  //count number of r's
+  int r = 0;
+  while (input[i] == 'r') {
+    i++;
+    r++;
+  }
+
+  if (r < 4) {
+     printInvalid(convert);
+     return;
+  }
+
+  i++;
+  if (input[i] != ':' || input[++i] != ':') {
+    printInvalid(convert);
+    return;
+  }
+
+  i++;
+  int caps = 0;
+  while (input[i] > 63 && input[i] < 91) {
+    caps++;
+  }
+
+  if (caps%2 != 1) {
+    printInvalid(convert);
+    return;
+  }
+
+  if (convert == 0) {
+    printf("yes\n");
+  }
+  else if (convert == 1) {
+    printf("%s%c\n", input[1], input[0]);
+  }
+
+  return;
 }
 
 char* typeB(char* input) {
@@ -31,17 +93,14 @@ int main(int argc, char* argv[])
 
   int i;
   for (i = 1; i < argc; i++) {
-    char* output;
     if (type == 0) {
-      output = typeA(argv[i]);
+      typeA(argv[i], 0);
     }
     else if (type == 1) {
-      output = typeB(argv[i]);
+      typeB(argv[i]);
     }
     else if (type == 2) {
-      output = typeC(argv[i]);
+      typeC(argv[i]);
     }
-
-    printf("%s\n", output);
   }
 }
