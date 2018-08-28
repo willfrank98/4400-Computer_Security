@@ -86,7 +86,7 @@ void typeA(char* input, int convert) {
     printf("yes\n");
   }
   else if (convert == 1) {
-    printf("%s%c\n", input[1], input[0]);
+    printf("%s%c\n", input + 1, input[0]);
   }
 
   return;
