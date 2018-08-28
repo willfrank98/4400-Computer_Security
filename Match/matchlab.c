@@ -101,8 +101,10 @@ int main(int argc, char* argv[])
   int t;
   int type = flags(argv, &t);
 
+  printf("flag: %c, t: %d\n", type, t);
+  
   int i;
-  for (i = 2; i < argc; i++) {
+  for (i = 2 + t; i < argc; i++) {
     if (type == 0) {
       typeA(argv[i], 0);
     }
