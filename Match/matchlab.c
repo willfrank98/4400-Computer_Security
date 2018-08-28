@@ -1,16 +1,25 @@
 #include <stdio.h>
 
-int flags(char* flag)
+int flags(char* argv[], int* t)
 {
-  if (flag[1] == 'a') {
-      return 0;
+  int i = 0, ret;
+  while (argv[i][0] == '-') {
+    if (argv[i][1] == 'a') {
+      ret = 0;
+    }
+    else if (argv[i][1] == 'b') {
+      ret = 1;
+    }
+    else if (argv[i][1] == 'c') {
+      ret = 2;
+    }
+    else if (argv[i][1] == 't') {
+      *t = 1;
+    }
+    i++;
   }
-  else if (flag[1] == 'b') {
-      return 1;
-  }
-  else if (flag[1] == 'c') {
-      return 2;
-  }
+
+  return ret;
 }
 
 void printInvalid(int conv) {
@@ -89,10 +98,11 @@ char* typeC(char* input) {
 
 int main(int argc, char* argv[])
 {
-  int type = flags(argv[1]);
+  int t;
+  int type = flags(argv, &t);
 
   int i;
-  for (i = 1; i < argc; i++) {
+  for (i = 2; i < argc; i++) {
     if (type == 0) {
       typeA(argv[i], 0);
     }
