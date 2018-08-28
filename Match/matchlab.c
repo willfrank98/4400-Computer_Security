@@ -2,7 +2,7 @@
 
 int flags(char* argv[], int* t)
 {
-  int i = 0, ret;
+  int i = 1, ret;
   while (argv[i][0] == '-') {
     if (argv[i][1] == 'a') {
       ret = 0;
@@ -40,13 +40,14 @@ void typeA(char* input, int convert) {
     printInvalid(convert);
     return;
   }
+  printf("Passed h count\n");
 
-  i++;
   //check for =
   if (input[i] != '=') {
     printInvalid(convert);
     return;
   }
+  printf("passed =\n");
 
   i++;
   //count number of r's
@@ -60,23 +61,26 @@ void typeA(char* input, int convert) {
      printInvalid(convert);
      return;
   }
+  printf("passed r count\n");
 
-  i++;
-  if (input[i] != ':' || input[++i] != ':') {
+  if (input[i] != ':' || input[i+1] != ':') {
     printInvalid(convert);
     return;
   }
+  printf("passed : count\n");
 
-  i++;
+  i += 2;
   int caps = 0;
   while (input[i] > 63 && input[i] < 91) {
     caps++;
+    i++;
   }
 
   if (caps%2 != 1) {
     printInvalid(convert);
     return;
   }
+  printf("passed caps count\n");
 
   if (convert == 0) {
     printf("yes\n");
@@ -98,15 +102,15 @@ char* typeC(char* input) {
 
 int main(int argc, char* argv[])
 {
-  int t;
+  int t = 0;
   int type = flags(argv, &t);
 
-  printf("flag: %c, t: %d\n", type, t);
-  
+  printf("flag: %d, t: %d\n", type, t);
+
   int i;
   for (i = 2 + t; i < argc; i++) {
     if (type == 0) {
-      typeA(argv[i], 0);
+      typeA(argv[i], t);
     }
     else if (type == 1) {
       typeB(argv[i]);
@@ -115,4 +119,6 @@ int main(int argc, char* argv[])
       typeC(argv[i]);
     }
   }
+
+  return 0;
 }
