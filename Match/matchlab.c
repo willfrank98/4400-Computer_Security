@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 int flags(char* argv[], int* t)
 {
@@ -30,30 +31,30 @@ void printInvalid(int conv) {
 }
 
 void typeA(char* input, int convert) {
-    int i = 0;
+    int pos = 0;
   //count number of h's
-  while (input[i] == 'h') {
-    i++;
+  while (input[pos] == 'h') {
+    pos++;
   }
 
-  if (i%2 != 0) {
+  if (pos%2 != 0) {
     printInvalid(convert);
     return;
   }
   printf("Passed h count\n");
 
   //check for =
-  if (input[i] != '=') {
+  if (input[pos] != '=') {
     printInvalid(convert);
     return;
   }
   printf("passed =\n");
 
-  i++;
+  pos++;
   //count number of r's
   int r = 0;
-  while (input[i] == 'r') {
-    i++;
+  while (input[pos] == 'r') {
+    pos++;
     r++;
   }
 
@@ -63,17 +64,17 @@ void typeA(char* input, int convert) {
   }
   printf("passed r count\n");
 
-  if (input[i] != ':' || input[i+1] != ':') {
+  if (input[pos] != ':' || input[pos+1] != ':') {
     printInvalid(convert);
     return;
   }
   printf("passed : count\n");
 
-  i += 2;
+  pos += 2;
   int caps = 0;
-  while (input[i] > 63 && input[i] < 91) {
+  while (input[pos] > 63 && input[pos] < 91) {
     caps++;
-    i++;
+    pos++;
   }
 
   if (caps%2 != 1) {
@@ -92,8 +93,80 @@ void typeA(char* input, int convert) {
   return;
 }
 
-char* typeB(char* input) {
+void typeB(char* input, int convert) {
+  int pos = 0;
+  
+  int k = 0;
+  while (input[pos] == 'k') {
+    k++;
+	pos++;
+  }
+  
+  if (k%2 != 0) {
+	printInvalid(convert);
+	return;
+  }
+  
+  if (input[pos++] != '=') {
+	printInvalid(convert);
+	return;
+  }
+  
+  //4 byte char arr, in case needs null terminator
+  char* decStr = calloc(4);
+  int dec = 0;
+  while (input[pos] > 47 && input[pos] < 58) {
+	decStr[dec++] = input[pos++];
+  }
+  //decStr[dec+1] = 0;
+  
+  if (dec > 3 || dec < 1) {
+	printInvalid(convert);
+	return;
+  }
+  
+  int u = 0;
+  while (input[pos] == 'u') {
+	u++;
+	pos++;
+  }
+  
+  if (u%2 != 1) {
+	printInvalid(convert);
+	return;
+  }
+  
+  if (input[pos++] != '=') {
+	printInvalid(convert);
+	return;
+  }
+  
+  int i;
+  for (i = 1; i < dec; i += 2) {
+	if (input[pos++] != decStr[i]) {
+	  printInvalid(convert);
+	  return;
+	}
+  }
+  
+  int caps = 0;
+  while (input[pos] > 63 && input[pos] < 91) {
+    caps++;
+    pos++;
+  }
 
+  if (caps%2 != 1) {
+    printInvalid(convert);
+    return;
+  }
+  
+  if (convert == 0) {
+    printf("yes\n");
+  }
+  else if (convert == 1) {
+    for (i = 0; i < 
+  }
+  
 }
 
 char* typeC(char* input) {
