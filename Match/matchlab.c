@@ -283,8 +283,6 @@ int main(int argc, char* argv[])
   int t = 0, increment = 0;
   int type = flags(argv, &t, &increment);
 
-  //printf("flag: %d, t: %d\n", type, t);
-
   int i;
   for (i = 1 + increment; i < argc; i++) {
     if (type == 0) {
