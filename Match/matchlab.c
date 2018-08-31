@@ -144,10 +144,11 @@ void typeB(char* input, int convert) {
   
   int i;
   for (i = 1; i < dec; i += 2) {
-	if (input[pos++] != decStr[i]) {
+	if (input[pos] != decStr[i]) {
 	  printInvalid(convert);
 	  return;
 	}
+	pos++;
   }
   
   int caps = 0;
@@ -167,14 +168,16 @@ void typeB(char* input, int convert) {
   else if (convert == 1) {
     for (i = 0; i < dec; i++) {
 	  printf("%c%d", input[i], i%8);
+    }
   }
+  
   printf("\n");
   return;
 }
 
 void typeC(char* input, int convert) {
   int pos = 0;
-	
+  
   while (input[pos] == 'g') {
     pos++;
   }
@@ -196,11 +199,71 @@ void typeC(char* input, int convert) {
   
   if (dec < 1 || dec > 3)
   {
-	 printInvalid(covnert);
-	  return;
+	printInvalid(covnert);
+	return;
   }
+  
+  int q = 0;
+  while (input[pos] == 'q') {
+    q++;
+  }
+  
+  if (q%2 != 1) {
+	printInvalid(convert);
+	return;
+  }
+  
+  if (input[pos] != ',') {
+	printInvalid(convert);
+	return;
+  }
+  
+  int caps = 0;
+  while (input[pos] > 64 && input[pos] < 91) {
+	caps++;
+	pos++;
+  }
+  
+  if (caps%2 != 1) {
+	printInvalid(convert);
+	return;
+  }
+  
+  int i;
+  for (i = 0; i < 3; i += 2) {
+	if (input[pos] != decStr[i]) {
+	  printInvalid(covnert);
+	  return;
+	}
+	pos++;
+  }
+  
+  if (convert == 0) {
+	printf("yes\n");
+  }
+  else if (convert == 1) {
+	int firstE = 0, lastE = pos;
 	
+	i = 0;
+	while (i < pos && input[i] != 'E') {
+	  firstE++;
+	  i++;
+	}
 	
+	i = pos;
+	while (i >= 0 && input[i] != 'E') {
+	  lastE--;
+	  i--;
+	}
+	
+	for (i = 0; i < pos; i++) {
+	  if (i != firstE && i != lastE) {
+		printf("%c", input[i]);
+	  }
+	}
+	printf("\n");
+  }
+  return;
 }
 
 int main(int argc, char* argv[])
