@@ -112,13 +112,14 @@ void typeB(char* input, int convert) {
 	return;
   }
   
-  //4 byte char arr, in case needs null terminator
-  char* decStr = calloc(4);
+  //need to store up to 4 chars
+  char* decStr = malloc(4);
   int dec = 0;
-  while (input[pos] > 47 && input[pos] < 58) {
-	decStr[dec++] = input[pos++];
+  while (input[pos] > 47 && input[pos] < 58 && dec < 5) {
+	decStr[dec] = input[pos];
+	dec++;
+	pos++;
   }
-  //decStr[dec+1] = 0;
   
   if (dec > 3 || dec < 1) {
 	printInvalid(convert);
@@ -164,13 +165,42 @@ void typeB(char* input, int convert) {
     printf("yes\n");
   }
   else if (convert == 1) {
-    for (i = 0; i < 
+    for (i = 0; i < dec; i++) {
+	  printf("%c%d", input[i], i%8);
   }
-  
+  printf("\n");
+  return;
 }
 
-char* typeC(char* input) {
-
+void typeC(char* input, int convert) {
+  int pos = 0;
+	
+  while (input[pos] == 'g') {
+    pos++;
+  }
+  
+  if (input[pos] != '=' || input[pos+1] != '=') {
+	printInvalid(convert);
+	return;
+  }
+	
+  pos += 2;
+  char* decStr = malloc(4);
+  int dec = 0;
+  //allow dec to go up to 4 to check for > 3
+  while (input[pos] > 47 && input[pos] < 58 && dec < 5) {
+	decStr[dec] = input[pos];
+	dec++;
+	pos++;
+  }
+  
+  if (dec < 1 || dec > 3)
+  {
+	 printInvalid(covnert);
+	  return;
+  }
+	
+	
 }
 
 int main(int argc, char* argv[])
@@ -186,10 +216,10 @@ int main(int argc, char* argv[])
       typeA(argv[i], t);
     }
     else if (type == 1) {
-      typeB(argv[i]);
+      typeB(argv[i], t);
     }
     else if (type == 2) {
-      typeC(argv[i]);
+      typeC(argv[i], t);
     }
   }
 

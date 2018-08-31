@@ -1,1 +1,1 @@
-putty williamf@lab1-30.eng.utah.edu
+williamf@lab1-30.eng.utah.edu -pw aPX4Pgm2suHy*
