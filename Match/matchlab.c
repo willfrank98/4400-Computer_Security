@@ -1,21 +1,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int flags(char* argv[], int* t)
+int flags(char* argv[], int* t, int* inc)
 {
-  int i = 1, ret;
+  int i = 1, ret = 0;
+  *inc = 0;
+
   while (argv[i][0] == '-') {
     if (argv[i][1] == 'a') {
       ret = 0;
+      (*inc)++;
     }
     else if (argv[i][1] == 'b') {
       ret = 1;
+      (*inc)++;
     }
     else if (argv[i][1] == 'c') {
       ret = 2;
+      (*inc)++;
     }
     else if (argv[i][1] == 't') {
       *t = 1;
+      (*inc)++;
     }
     i++;
   }
@@ -41,14 +47,12 @@ void typeA(char* input, int convert) {
     printInvalid(convert);
     return;
   }
-  printf("Passed h count\n");
 
   //check for =
   if (input[pos] != '=') {
     printInvalid(convert);
     return;
   }
-  printf("passed =\n");
 
   pos++;
   //count number of r's
@@ -62,13 +66,11 @@ void typeA(char* input, int convert) {
      printInvalid(convert);
      return;
   }
-  printf("passed r count\n");
 
   if (input[pos] != ':' || input[pos+1] != ':') {
     printInvalid(convert);
     return;
   }
-  printf("passed : count\n");
 
   pos += 2;
   int caps = 0;
@@ -81,7 +83,12 @@ void typeA(char* input, int convert) {
     printInvalid(convert);
     return;
   }
-  printf("passed caps count\n");
+
+  //check to make sure no extra characters at end of string
+  if (input[pos] != 0) {
+    printInvalid(convert);
+    return;
+  }
 
   if (convert == 0) {
     printf("yes\n");
@@ -95,23 +102,18 @@ void typeA(char* input, int convert) {
 
 void typeB(char* input, int convert) {
   int pos = 0;
-  
+
   int k = 0;
   while (input[pos] == 'k') {
     k++;
 	pos++;
   }
-  
-  if (k%2 != 0) {
-	printInvalid(convert);
-	return;
-  }
-  
+
   if (input[pos++] != '=') {
 	printInvalid(convert);
 	return;
   }
-  
+
   //need to store up to 4 chars
   char* decStr = malloc(4);
   int dec = 0;
@@ -120,36 +122,37 @@ void typeB(char* input, int convert) {
 	dec++;
 	pos++;
   }
-  
+
   if (dec > 3 || dec < 1) {
 	printInvalid(convert);
 	return;
   }
-  
+
   int u = 0;
   while (input[pos] == 'u') {
 	u++;
 	pos++;
   }
-  
+
   if (u%2 != 1) {
 	printInvalid(convert);
 	return;
   }
-  
+
   if (input[pos++] != '=') {
 	printInvalid(convert);
 	return;
   }
-  
+
   int i;
   for (i = 1; i < dec; i += 2) {
-	if (input[pos++] != decStr[i]) {
+	if (input[pos] != decStr[i]) {
 	  printInvalid(convert);
 	  return;
 	}
+	pos++;
   }
-  
+
   int caps = 0;
   while (input[pos] > 63 && input[pos] < 91) {
     caps++;
@@ -160,30 +163,35 @@ void typeB(char* input, int convert) {
     printInvalid(convert);
     return;
   }
-  
+
+  if (input[pos] != 0) {
+    printInvalid(convert);
+    return;
+  }
+
   if (convert == 0) {
     printf("yes\n");
   }
   else if (convert == 1) {
-    for (i = 0; i < dec; i++) {
+    for (i = 0; i < pos; i++) {
 	  printf("%c%d", input[i], i%8);
+    }
+    printf("\n");
   }
-  printf("\n");
   return;
 }
 
 void typeC(char* input, int convert) {
   int pos = 0;
-	
   while (input[pos] == 'g') {
     pos++;
   }
-  
+
   if (input[pos] != '=' || input[pos+1] != '=') {
 	printInvalid(convert);
 	return;
   }
-	
+
   pos += 2;
   char* decStr = malloc(4);
   int dec = 0;
@@ -193,25 +201,90 @@ void typeC(char* input, int convert) {
 	dec++;
 	pos++;
   }
-  
+
   if (dec < 1 || dec > 3)
   {
-	 printInvalid(covnert);
-	  return;
+	printInvalid(convert);
+	return;
   }
-	
-	
+
+  int q = 0;
+  while (input[pos] == 'q') {
+    q++;
+    pos++;
+  }
+
+  if (q%2 != 1) {
+	printInvalid(convert);
+	return;
+  }
+
+  if (input[pos] != ',') {
+	printInvalid(convert);
+	return;
+  }
+
+  pos++;
+  int caps = 0;
+  while (input[pos] > 64 && input[pos] < 91) {
+	caps++;
+	pos++;
+  }
+
+  if (caps%2 != 1) {
+	printInvalid(convert);
+	return;
+  }
+
+  int i;
+  for (i = 0; i < dec; i += 2) {
+	if (input[pos] != decStr[i]) {
+	  printInvalid(convert);
+	  return;
+	}
+	pos++;
+  }
+
+  if (input[pos] != 0) {
+    printInvalid(convert);
+    return;
+  }
+
+  if (convert == 0) {
+	printf("yes\n");
+  }
+  else if (convert == 1) {
+	int firstE = 0, lastE = pos;
+
+	i = 0;
+	while (i < pos && input[i] != 'E') {
+	  firstE++;
+	  i++;
+	}
+
+	i = pos;
+	while (i >= 0 && input[i] != 'E') {
+	  lastE--;
+	  i--;
+	}
+
+	for (i = 0; i < pos; i++) {
+	  if (i != firstE && i != lastE) {
+		printf("%c", input[i]);
+	  }
+	}
+	printf("\n");
+  }
+  return;
 }
 
 int main(int argc, char* argv[])
 {
-  int t = 0;
-  int type = flags(argv, &t);
-
-  printf("flag: %d, t: %d\n", type, t);
+  int t = 0, increment = 0;
+  int type = flags(argv, &t, &increment);
 
   int i;
-  for (i = 2 + t; i < argc; i++) {
+  for (i = 1 + increment; i < argc; i++) {
     if (type == 0) {
       typeA(argv[i], t);
     }
