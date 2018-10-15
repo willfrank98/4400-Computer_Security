@@ -1,0 +1,21 @@
+#include <stdio.h>
+
+int flags(char* flag)
+{
+  if (flag[1] == 'a') {
+      return 0;
+  }
+  if (flag[1] == 'b') {
+      return 1;
+  }
+  if (flag[1] == 'c') {
+      return 2;
+  }
+}
+
+int main(int argc, char* argv[])
+{
+  int type = flags(argv[1]);
+
+  
+}
