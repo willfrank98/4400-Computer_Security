@@ -5,7 +5,7 @@
 
 /* return y=Ax */
 static int *matrix_times_vector(int A[N][N], int *x) {
-   int *y = malloc(N*sizeof(int));
+   int *y = calloc(N*sizeof(int));
    int i, j;
    for (i=0; i<N; i++)
       for (j=0; j<N; j++)
@@ -27,6 +27,10 @@ int main() {
 		  { 5, 6, 7, 8 } };
   int x[N] = { 10, 100, 1000, 10000 };
   int *y;
+
+  y = matrix_times_vector(A, x);
+  show_vector(y);
+  free(y);
 
   y = matrix_times_vector(A, x);
   show_vector(y);
