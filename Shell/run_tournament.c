@@ -83,7 +83,7 @@ static void run_tournament2(int seed, int rounds, int players, char **progs)
         Dup2(p_in[j][0], 0);
         Dup2(p_out[j][1], 1);
         Close(p_out[j][0]);
-        Close(p_in[j][1]);
+        //Close(p_in[j][1]);
         Execve(p_args[0], p_args, environ);
       } else {
         Close(p_out[j][1]);

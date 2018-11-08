@@ -24,7 +24,7 @@ int main(int argc, char **argv)
   /* Walk across the board */
 
   y = 0;
-  while (y < MAX_POSITION) {
+  while (y <= MAX_POSITION) {
     int i;
 
     /* Jump to last x of this y, which is reachable
