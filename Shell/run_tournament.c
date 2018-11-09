@@ -45,6 +45,9 @@ static void run_tournament2(int seed, int rounds, int players, char **progs)
     fails[i] = 0;
   }
 
+  //ignore pipes closing from other processes
+  Signal(SIGPIPE, SIG_IGN);
+
   for (i = 0; i < rounds; i++) {
     printf("Round %d\n", i);
     //pipe and launch game_maker
@@ -93,18 +96,18 @@ static void run_tournament2(int seed, int rounds, int players, char **progs)
 
     //read the goal, though not necessary to pipe it anywhere
     char* goal = read_to_string(game_out[0], 7);
-    //printf("Got goal: %s", goal);
+    printf("Got goal: %s", goal);
 
     int skip[players];
     for (j = 0; j < players; j++) {
       //read and send starting pos's
       char* start = read_to_string(game_out[0], 7);
-      //printf("Got start pos for player %d: %s", j, start);
+      printf("Got start pos for player %d: %s", j, start);
       Rio_writen(p_in[j][1], start, 7);
       skip[j] = 0;
     }
 
-    int next_round = 0;
+    int next_round = 0, round_fails = 0;
     //play the game
     while (!next_round) { //run until one player wins
       for (j = 0; j < players; j++) {
@@ -113,29 +116,41 @@ static void run_tournament2(int seed, int rounds, int players, char **progs)
         }
         //get player guess
         char* guess = read_to_string(p_out[j][0], 7);
-        //printf("Got player %d's next guess: %s", j, guess);
-        //send to game_maker
-        Rio_writen(game_in[1], guess, 7);
-        //get response
-        char* res = read_to_string(game_out[0], 7);
-        //printf("This guess was: %s", res);
+        printf("Got player %d's next guess: %s", j, guess);
+        //send to game_maker, assuming enough bytes are recieved
+        char res[7];
+        //if (t >= 7) {
+          Rio_writen(game_in[1], guess, 7);
+          //get response
+          Rio_readn(game_out[0], res, 7);
+          printf("This guess was: %s", res);
+          //}
+
         if (strcmp(res, "winner\n") == 0) { //winner!
           next_round = 1;
           Rio_writen(p_in[j][1], res, 7);
           //check to make sure winner exits correctly
           int status;
           waitpid(pids[j], &status, 0);
-          if (WEXITSTATUS(status)) {
+          if ((WIFEXITED(status) && WEXITSTATUS(status) != 0) || (WIFSIGNALED(status))) {
             printf("Winner DID NOT exit correctly\n");
             fails[j]++;
-          } else {
-            wins[j]++;
           }
+          wins[j]++;
           break;
         }
-        else if (strcmp(res, "wrong!") == 0) { //fail
+        else if (strcmp(res, "wrong!\n") == 0 /*|| t < 7*/) { //fail
           fails[j]++;
           skip[j] = 1;
+          round_fails++;
+
+          //if all palyers fail, end round
+          if (round_fails == players) {
+            printf("All players failed\n");
+            next_round = 1;
+          }
+
+          break;
         }
         //send response to player
         Rio_writen(p_in[j][1], res, 7);
@@ -156,7 +171,7 @@ static void run_tournament2(int seed, int rounds, int players, char **progs)
     deal_with_losers(pids, players);
     kill(game_pid, SIGINT);
     int status;
-    Wait(&status);
+    waitpid(game_pid, &status, 0);
   }
 
   //write the results here
@@ -172,14 +187,17 @@ static char *read_to_string(int fd, int len) {
   char buffer[size];
   while(amt < len) {
     got = Read(fd, buffer + amt, len - amt);
+    if (got == 0)
+      break;
     amt += got;
   }
   return strdup(buffer);
 }
 
 static void deal_with_losers(int pids[], int players) {
-  int i;
+  int i, status;
   for (i = 0; i < players; i++) {
     kill(pids[i], SIGINT);
+    waitpid(pids[i], &status, 0);
   }
 }
