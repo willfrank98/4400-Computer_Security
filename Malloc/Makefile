@@ -4,7 +4,7 @@ MM = mm.c
 
 OBJS = usemem.o mm.o
 
-COMPACT = 
+COMPACT =
 
 all: usemem
 
