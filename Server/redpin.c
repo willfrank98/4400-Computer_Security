@@ -3,7 +3,7 @@
  *            places.
  *
  * Based on:
- *  tiny.c - A simple, iterative HTTP/1.0 Web server that uses the 
+ *  tiny.c - A simple, iterative HTTP/1.0 Web server that uses the
  *      GET method to serve static and dynamic content.
  *   Tiny Web server
  *   Dave O'Hallaron
@@ -16,12 +16,12 @@
 static void doit(int fd);
 static dictionary_t *read_requesthdrs(rio_t *rp);
 static void read_postquery(rio_t *rp, dictionary_t *headers, dictionary_t *d);
-static void clienterror(int fd, char *cause, char *errnum, 
+static void clienterror(int fd, char *cause, char *errnum,
                         char *shortmsg, char *longmsg);
 static void print_stringdictionary(dictionary_t *d);
 static void serve_request(int fd, dictionary_t *query);
 
-int main(int argc, char **argv) 
+int main(int argc, char **argv)
 {
   int listenfd, connfd;
   char hostname[MAXLINE], port[MAXLINE];
@@ -48,7 +48,7 @@ int main(int argc, char **argv)
     clientlen = sizeof(clientaddr);
     connfd = Accept(listenfd, (SA *)&clientaddr, &clientlen);
     if (connfd >= 0) {
-      Getnameinfo((SA *) &clientaddr, clientlen, hostname, MAXLINE, 
+      Getnameinfo((SA *) &clientaddr, clientlen, hostname, MAXLINE,
                   port, MAXLINE, 0);
       printf("Accepted connection from (%s, %s)\n", hostname, port);
       doit(connfd);
@@ -60,7 +60,7 @@ int main(int argc, char **argv)
 /*
  * doit - handle one HTTP request/response transaction
  */
-void doit(int fd) 
+void doit(int fd)
 {
   char buf[MAXLINE], *method, *uri, *version;
   rio_t rio;
@@ -71,7 +71,7 @@ void doit(int fd)
   if (Rio_readlineb(&rio, buf, MAXLINE) <= 0)
     return;
   printf("%s", buf);
-  
+
   if (!parse_request_line(buf, &method, &uri, &version)) {
     clienterror(fd, method, "400", "Bad Request",
                 "Redpin did not recognize the request");
@@ -116,7 +116,7 @@ void doit(int fd)
 /*
  * read_requesthdrs - read HTTP request headers
  */
-dictionary_t *read_requesthdrs(rio_t *rp) 
+dictionary_t *read_requesthdrs(rio_t *rp)
 {
   char buf[MAXLINE];
   dictionary_t *d = make_dictionary(COMPARE_CASE_INSENS, free);
@@ -127,7 +127,7 @@ dictionary_t *read_requesthdrs(rio_t *rp)
     parse_header_line(buf, d);
     Rio_readlineb(rp, buf, MAXLINE);
   }
-  
+
   return d;
 }
 
@@ -135,12 +135,12 @@ void read_postquery(rio_t *rp, dictionary_t *headers, dictionary_t *dest)
 {
   char *len_str, *type, *buffer;
   int len;
-  
+
   len_str = dictionary_get(headers, "Content-Length");
   len = (len_str ? atoi(len_str) : 0);
 
   type = dictionary_get(headers, "Content-Type");
-  
+
   buffer = malloc(len+1);
   Rio_readnb(rp, buffer, len);
   buffer[len] = 0;
@@ -154,7 +154,7 @@ void read_postquery(rio_t *rp, dictionary_t *headers, dictionary_t *dest)
 
 static char *ok_header(size_t len, const char *content_type) {
   char *len_str, *header;
-  
+
   header = append_strings("HTTP/1.0 200 OK\r\n",
                           "Server: Redpin Web Server\r\n",
                           "Connection: close\r\n",
@@ -195,8 +195,8 @@ static void serve_request(int fd, dictionary_t *query)
 /*
  * clienterror - returns an error message to the client
  */
-void clienterror(int fd, char *cause, char *errnum, 
-		 char *shortmsg, char *longmsg) 
+void clienterror(int fd, char *cause, char *errnum,
+		 char *shortmsg, char *longmsg)
 {
   size_t len;
   char *header, *body, *len_str;
@@ -215,7 +215,7 @@ void clienterror(int fd, char *cause, char *errnum,
                           "Content-length: ", len_str = to_string(len), "\r\n\r\n",
                           NULL);
   free(len_str);
-  
+
   Rio_writen(fd, header, strlen(header));
   Rio_writen(fd, body, len);
 
@@ -229,7 +229,7 @@ static void print_stringdictionary(dictionary_t *d)
   const char **keys;
 
   keys = dictionary_keys(d);
-  
+
   for (i = 0; keys[i] != NULL; i++) {
     printf("%s=%s\n",
            keys[i],
