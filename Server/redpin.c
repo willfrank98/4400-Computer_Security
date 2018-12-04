@@ -294,7 +294,7 @@ static void counts_request(int fd, dictionary_t *query)
   int people_count = dictionary_count(people);
   int places_count = dictionary_count(places);
 
-  body = append_strings(to_string(people_count), "\n", to_string(places_count), "\n");
+  body = append_strings(to_string(people_count), "\n", to_string(places_count), "\n", NULL);
 
   len = strlen(body);
 
@@ -543,6 +543,11 @@ static void unpin_request(int fd, dictionary_t *query)
       }
     }
   }
+
+  free(people_list);
+  free(places_list);
+
+  counts_request(fd, query);
 }
 
 /*
