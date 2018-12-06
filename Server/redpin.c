@@ -312,11 +312,6 @@ static void people_request(int fd, dictionary_t *query)
   size_t len;
   char *body, *header, *place;
 
-  if (!dictionary_has_key(query, "place"))
-  {
-    clienterror(fd, "Invalid place argument", "400", "", "");
-    return;
-  }
   place = dictionary_get(query, "place");
   
   body = "";
@@ -347,10 +342,10 @@ static void people_request(int fd, dictionary_t *query)
 
     free(all_people);
   }
-  else
-  {
-    body = strdup("");
-  }
+  // else
+  // {
+  //   body = strdup("");
+  // }
 
   len = strlen(body);
 
@@ -365,7 +360,7 @@ static void people_request(int fd, dictionary_t *query)
   /* Send response body to client */
   Rio_writen(fd, body, len);
 
-  free(body);
+  //free(body);
 }
 
 static void places_request(int fd, dictionary_t *query)
@@ -373,11 +368,6 @@ static void places_request(int fd, dictionary_t *query)
   size_t len;
   char *body, *header, *person;
 
-  if (!dictionary_has_key(query, "person"))
-  {
-    clienterror(fd, "Invalid person argument", "400", "", "");
-    return;
-  }
   person = dictionary_get(query, "person");
   
   body = "";
@@ -385,13 +375,12 @@ static void places_request(int fd, dictionary_t *query)
   {
     //return all places
     const char** all_places = dictionary_keys(places);
-
+    //body = "";
     int i = 0;
     for (i = 0; i < dictionary_count(places); i++)
     {
       body = append_strings(body, all_places[i], "\n", NULL);
     }
-
     free(all_places);
   }
   else if (dictionary_has_key(people, person))
@@ -399,7 +388,7 @@ static void places_request(int fd, dictionary_t *query)
     //gets all people at `place`
     dictionary_t *temp = dictionary_get(people, person);
     const char** all_places = dictionary_keys(temp);
-
+    //body = "";
     int i = 0;
     for (i = 0; i < dictionary_count(temp); i++)
     {
@@ -408,10 +397,10 @@ static void places_request(int fd, dictionary_t *query)
 
     free(all_places);
   }
-  else
-  {
-    body = strdup("");
-  }
+  // else
+  // {
+  //   body = strdup("");
+  // }
 
   len = strlen(body);
 
@@ -426,7 +415,7 @@ static void places_request(int fd, dictionary_t *query)
   /* Send response body to client */
   Rio_writen(fd, body, len);
 
-  free(body);
+  //free(body);
 }
 
 static void pin_request(int fd, dictionary_t *query)
@@ -641,6 +630,45 @@ static void copy_request(int fd, dictionary_t *query)
   else if (dictionary_has_key(query, "place"))
   {
     // copying a place
+    if (!dictionary_has_key(query, "place"))
+    {
+      clienterror(fd, "Invalid place argument", "400", "", "");
+      return;
+    }
+    char* place = dictionary_get(query, "place");
+    // create request
+    body = append_strings("GET /people?place=", place, " HTTP/1.1\r\n\r\n", NULL);
+
+    // send request
+    Rio_writen(client_fd, body, strlen(body));
+    free(body);
+
+    char buf[MAXLINE], *version, *status, *desc;
+    rio_t rio;
+
+    Rio_readinitb(&rio, client_fd);
+    // read initial header
+    Rio_readlineb(&rio, buf, MAXLINE);
+    parse_status_line(buf, &version, &status, &desc);
+    dictionary_t* temp = make_dictionary(COMPARE_CASE_SENS, free);
+    // read the rest of the response
+    do 
+    {
+      Rio_readlineb(&rio, buf, MAXLINE);
+      parse_header_line(buf, temp);
+    } 
+    while(strcmp(buf, "\r\n"));
+
+    char* size = dictionary_get(temp, "Content-length");
+    size_t len = atoi(size);
+    char new_buf[len];
+    Rio_readnb(&rio, new_buf, len);
+
+    char* as_place = dictionary_get(query, "as");
+    dictionary_set(temp, "people", new_buf);
+    dictionary_set(temp, "places", as_place);
+    pin_request(fd, temp);
+    free(temp);
   }
   else
   {
